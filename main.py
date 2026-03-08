@@ -7,16 +7,14 @@ from methods.neh_basic import (
     print_schedule
 )
 
-from methods.neh_autores import neh_autores
 from methods.neh_autores_taillard import neh_autores_taillard
 
 # ==========================================
 # CONFIGURACION DEL METODO
 # ==========================================
 #METHOD = "NEH_BASIC"              # Versión básica original
-#METHOD = "NEH_AUTORES"           # Versión con Rule-f
 METHOD = "NEH_AUTORES_TAILLARD"  # Versión optimizada (MÁS RÁPIDA)
-GROUP_SIZE = 6
+GROUP_SIZE = 3
 
 # ===============================
 # INSTANCIAS
@@ -101,8 +99,6 @@ def solve_instance(inst):
     # Se obtiene la secuencia de trabajos construida con la heuristica escogida
     if METHOD == "NEH_BASIC":
         sequence = construct_solution(jobs, m)
-    elif METHOD == "NEH_AUTORES":
-        sequence = neh_autores(jobs, m, F=GROUP_SIZE)
     elif METHOD == "NEH_AUTORES_TAILLARD":
         sequence = neh_autores_taillard(jobs, m, F=GROUP_SIZE)
     else:
