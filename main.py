@@ -7,14 +7,17 @@ from methods.neh_basic import (
     print_schedule
 )
 
+from methods.neh_simple_noise import neh_simple_noise
 from methods.neh_autores_taillard import neh_autores_taillard
 
 # ==========================================
 # CONFIGURACION DEL METODO
 # ==========================================
-#METHOD = "NEH_BASIC"              # Versión básica original
-METHOD = "NEH_AUTORES_TAILLARD"  # Versión optimizada (MÁS RÁPIDA)
+METHOD = "NEH_BASIC"              # Versión básica original
+#METHOD = "NEH_AUTORES_TAILLARD"  # Versión optimizada (MÁS RÁPIDA)
+#METHOD = "NEH_SIMPLE_NOISE"  # Versión simple aleatorizada
 GROUP_SIZE = 3
+NOISE_RATIO = 0.3  # ±30% de ruido
 
 # ===============================
 # INSTANCIAS
@@ -101,6 +104,8 @@ def solve_instance(inst):
         sequence = construct_solution(jobs, m)
     elif METHOD == "NEH_AUTORES_TAILLARD":
         sequence = neh_autores_taillard(jobs, m, F=GROUP_SIZE)
+    elif METHOD == "NEH_SIMPLE_NOISE":
+        sequence = neh_simple_noise(jobs, m, noise_ratio=NOISE_RATIO)
     else:
         raise ValueError("Metodo no reconocido")
 
