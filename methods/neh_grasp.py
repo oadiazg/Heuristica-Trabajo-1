@@ -192,9 +192,10 @@ def neh_grasp(jobs, m, F=2, num_iterations=10, seed=None, alpha=0.2):
         if improved_cost < best_cost:
             best_cost = improved_cost
             best_sequence = improved_sequence.copy()
-            print(f"    Iter {iteration + 1}: Z = {improved_cost} ✓ (mejora: {construction_cost - improved_cost})")
+            # print(f"    Iter {iteration + 1}: Z = {improved_cost} ✓ (mejora: {construction_cost - improved_cost})")
         else:
-            print(f"    Iter {iteration + 1}: Z = {improved_cost}")
+            # print(f"    Iter {iteration + 1}: Z = {improved_cost}")
+            pass
     
     print(f"  [GRASP] Mejor solución encontrada: Z = {best_cost}\n")
     
