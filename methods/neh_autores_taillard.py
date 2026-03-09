@@ -22,9 +22,9 @@ from auxiliar.taillard import (
 # INDICE DE PRIORIDAD AVG + STD
 # ==========================================
 def job_priority_index(job):
-    # Funcion para calcular el indice de prioridad para cada trabajo
-    # Requiere el objeto Job que deseamos evaluar
-    # Devuelve el indice de prioridad: AVG + STD
+    '''Funcion para calcular el indice de prioridad para cada trabajo'''
+    '''Requiere el objeto Job que deseamos evaluar'''
+    '''Devuelve el indice de prioridad: AVG + STD'''
     processing_times = [op.p for op in job.operations]
     avg = statistics.mean(processing_times)
     std = statistics.pstdev(processing_times)
@@ -34,9 +34,9 @@ def job_priority_index(job):
 # ORDENAMIENTO DE JOBS
 # ==========================================
 def sort_jobs_by_priority(jobs):
-    # Funcion para ordenar los trabajos por su indice de prioridad
-    # Requiere la lista de objetos Job a ordenar
-    # Devuelve una lista de índices de trabajos ordenada por prioridad (mayor a menor)
+    '''Funcion para ordenar los trabajos por su indice de prioridad'''
+    '''Requiere la lista de objetos Job a ordenar'''
+    '''Devuelve una lista de índices de trabajos ordenada por prioridad (mayor a menor)'''
     order = list(range(len(jobs)))
     order.sort(
         key=lambda j: job_priority_index(jobs[j]),
@@ -45,12 +45,21 @@ def sort_jobs_by_priority(jobs):
     return order
 
 # ==========================================
+# CALCULAR COSTO INTRINSECO DE UN TRABAJO
+# ==========================================
+def get_job_processing_cost(job):
+    '''Funcion para calcular la suma de los tiempos de procesamiento de todas las operaciones del trabajo'''
+    '''Requiere un objeto Job'''
+    '''Devuelve la suma de p (processing times) de todas sus operaciones'''
+    return sum(op.p for op in job.operations)
+
+# ==========================================
 # MEJOR INSERCION DE UN SOLO JOB
 # ==========================================
 def best_insertion_single_taillard(sequence, job, jobs, m, offsets_cache=None):
-    # Funcion para encontrar la mejor posición de inserción de un solo trabajo
-    # Requiere secuencia actual, indice del job a insertar, jobs, numero de maquinas, y opcionalmente cache de offsets
-    # Devuelve la mejor posición de inserción y el valor de la función objetivo para esa inserción
+    '''Funcion para encontrar la mejor posición de inserción de un solo trabajo'''
+    '''Requiere secuencia actual, indice del job a insertar, jobs, numero de maquinas, y opcionalmente cache de offsets'''
+    '''Devuelve la mejor posición de inserción y el valor de la función objetivo para esa inserción'''
     best_pos = 0
     best_value = float("inf")
     for pos in range(len(sequence) + 1):
@@ -71,9 +80,9 @@ def best_insertion_single_taillard(sequence, job, jobs, m, offsets_cache=None):
 # MEJOR INSERCION DE UN GRUPO
 # ==========================================
 def insert_group_best_position_taillard(sequence, group_order, jobs, m, offsets_cache=None):
-    # Funcion para encontrar la mejor inserción de un grupo de trabajos en la secuencia
-    # Requiere secuencia actual, orden del grupo, jobs, numero de maquinas, y opcionalmente cache de offsets
-    # Devuelve la mejor secuencia resultante de insertar el grupo y el valor de la función objetivo
+    '''Funcion para encontrar la mejor inserción de un grupo de trabajos en la secuencia'''
+    '''Requiere secuencia actual, orden del grupo, jobs, numero de maquinas, y opcionalmente cache de offsets'''
+    '''Devuelve la mejor secuencia resultante de insertar el grupo y el valor de la función objetivo'''
     best_seq = None
     best_value = float("inf")
     for pos in range(len(sequence) + 1):
@@ -90,34 +99,48 @@ def insert_group_best_position_taillard(sequence, group_order, jobs, m, offsets_
 # HEURISTICA NEH MODIFICADA (AUTORES)
 # ==========================================
 def neh_autores_taillard(jobs, m, F=2):
-    # Implementa el algoritmo NEH modificado con Rule-f (NEH-df) propuesto por Gao y autores
-    # Incorpora optimizaciones: find_start() mejorado, evaluación incremental, caching de offsets, B&B optimizado
-    # Requiere los objetos Job, numero de maquinas, y tamaño del grupo F (por defecto 2)
-    # Devuelve una secuencia de trabajos construida
+    '''Implementa el algoritmo NEH modificado con Rule-f (NEH-df) propuesto por Gao y autores'''
+    '''Incorpora optimizaciones: find_start() mejorado, evaluación incremental, caching de offsets, B&B optimizado'''
+    '''Usa criterio realista para aceptar inserciones: new_cost <= current_cost + cost_job_new'''
+    '''Requiere los objetos Job, numero de maquinas, y tamaño del grupo F (por defecto 2)'''
+    '''Devuelve una secuencia de trabajos construida'''
     n = len(jobs)
     # OPTIMIZACION 4: Se cachean TODOS los offsets de los trabajos UNA SOLA VEZ
+    # Esto evita recalcularlos múltiples veces durante el algoritmo
     offsets_cache = {}
     for job_idx in range(n):
         offsets_cache[job_idx] = compute_offsets(jobs[job_idx])
     # STEP 1: Se ordenan los trabajos por índice de prioridad (AVG + STD) de mayor a menor
     Js = sort_jobs_by_priority(jobs)
+    # Se inicializa la secuencia vacía
     sequence = []
     # STEP 2: Se repite MIENTRAS el número de trabajos no insertados sea mayor o igual a F
     while len(Js) >= F:
         # Se obtiene el costo actual de la secuencia (antes de insertar un nuevo trabajo)
         if sequence:
+            # Si la secuencia no está vacía, se calcula el total flow time actual
             current_cost = compute_completion_time_nwjssp(sequence, jobs, m, offsets_cache)
         else:
-            current_cost = float("inf")
+            # Si la secuencia está vacía, el costo actual es 0
+            current_cost = 0
         # Se toma el primer trabajo de la lista de trabajos no insertados
         j = Js[0]
+        # Se obtiene el objeto Job para acceder a sus operaciones
+        job = jobs[j]
+        # Se calcula el costo intrínseco del trabajo nuevo (suma de tiempos de procesamiento)
+        cost_job_new = get_job_processing_cost(job)
         # Se intenta inserción individual (Rule 2)
+        # Se busca la mejor posición para insertar el trabajo individual
         pos, new_cost = best_insertion_single_taillard(sequence, j, jobs, m, offsets_cache)
-        # Si C_max NO empeora (new_cost < current_cost), insertar j y continuar
-        if len(sequence) == 0 or new_cost < current_cost:
+        # CRITERIO MEJORADO: Aceptar inserción si new_cost <= current_cost + cost_job_new
+        # Esto significa: si la degradación del costo es solo por lo que el trabajo en sí cuesta procesar
+        # Si se cumple, insertar j y continuar; si no, aplicar Rule-f (inserción grupal con B&B)
+        if len(sequence) == 0 or new_cost <= current_cost + cost_job_new:
+            # Se inserta el trabajo en la mejor posición encontrada
             sequence.insert(pos, j)
+            # Se remueve el trabajo de la lista de trabajos no insertados
             Js.pop(0)
-        # Si C_max EMPEORA, aplicar Rule-f (inserción grupal con B&B)
+        # Si el costo empeora MÁS de lo esperado, aplicar Rule-f (inserción grupal con B&B)
         else:
             # Se seleccionan los primeros F trabajos del grupo de trabajos no insertados
             group = Js[:F]
@@ -127,8 +150,11 @@ def neh_autores_taillard(jobs, m, F=2):
             if best_order is None:
                 # Fallback: Si no se encuentra orden válido, insertar trabajos individuales
                 for job_idx in group:
+                    # Se encuentra la mejor posición para cada trabajo del grupo
                     best_pos, _ = best_insertion_single_taillard(sequence, job_idx, jobs, m, offsets_cache)
+                    # Se inserta el trabajo en la mejor posición encontrada
                     sequence.insert(best_pos, job_idx)
+                # Se remueven los F trabajos que acaban de ser insertados
                 Js = Js[F:]
             else:
                 # Se inserta el grupo en la mejor posición encontrada
@@ -145,7 +171,9 @@ def neh_autores_taillard(jobs, m, F=2):
                 Js = Js[F:]
     # STEP 3: Se insertan los trabajos restantes (cuando |Js| < F) usando Rule 2
     for j in Js:
+        # Se encuentra la mejor posición para cada trabajo restante
         best_pos, _ = best_insertion_single_taillard(sequence, j, jobs, m, offsets_cache)
+        # Se inserta el trabajo en la mejor posición encontrada
         sequence.insert(best_pos, j)
     # Se devuelve la secuencia de trabajos construida
     return sequence
