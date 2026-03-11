@@ -8,7 +8,7 @@ from methods.neh_basic import compute_offsets, find_start
 # CALCULO DE TIEMPO DE COMPLETITUD
 # ===============================
 def compute_completion_time_nwjssp(sequence, jobs, m, offsets_cache=None):
-    'Funcion para calcular el tiempo de completitud total (flow time) para NWJSSP'
+    'Funcion para calcular el tiempo de completitud total'
     'Requiere una secuencia de trabajos, los objetos Job, numero de maquinas, y opcionalmente cache de offsets'
     'Devuelve el total flow time (∑Cj) de la secuencia evaluada'
     if not sequence:

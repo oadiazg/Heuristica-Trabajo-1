@@ -3,6 +3,7 @@ Branch and Bound optimizado para encontrar el mejor orden de un grupo de trabajo
 Incorpora caching de offsets y evaluación eficiente.
 """
 from auxiliar.taillard import compute_completion_time_nwjssp
+from methods.neh_basic import evaluate_sequence
 
 # ==========================================
 # BRANCH AND BOUND PARA ORDENAR GRUPO
@@ -24,8 +25,6 @@ def best_group_order(sequence, group, jobs, m, use_taillard=False, offsets_cache
             if use_taillard:
                 value = compute_completion_time_nwjssp(temp, jobs, m, offsets_cache)
             else:
-                'Fallback a evaluacion basica si no hay taillard'
-                from methods.neh_basic import evaluate_sequence
                 value = evaluate_sequence(temp, jobs, m)
             if value < best_value:
                 best_value = value
@@ -37,7 +36,6 @@ def best_group_order(sequence, group, jobs, m, use_taillard=False, offsets_cache
             if use_taillard:
                 bound = compute_completion_time_nwjssp(temp, jobs, m, offsets_cache)
             else:
-                from methods.neh_basic import evaluate_sequence
                 bound = evaluate_sequence(temp, jobs, m)
             if bound >= best_value:
                 continue
