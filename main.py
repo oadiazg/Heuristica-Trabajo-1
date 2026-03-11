@@ -25,13 +25,13 @@ METHOD_FILES = {
 }
 
 # Parametros globales
-GROUP_SIZE = 3      # Tamaño del grupo F para las inserciones grupales en NEH
+GROUP_SIZE = 4      # Tamaño del grupo F para las inserciones grupales en NEH
 SEED = 42          # Semilla global para controlar reproducibilidad de métodos aleatorizados
 
 NOISE_RATIO = 0.3  # Porcentaje de ruido para NEH_SIMPLE_NOISE (±30% alrededor del costo del trabajo)
 
-GRASP_ITERATIONS = 100  # Número de iteraciones de GRASP
-GRASP_ALPHA = 0.2       # Parámetro de aleatoriedad (0-1) en la fase constructiva de GRASP
+GRASP_ITERATIONS = 5  # Número de iteraciones de GRASP
+GRASP_ALPHA = 0.4       # Parámetro de aleatoriedad (0-1) en la fase constructiva de GRASP
 
 
 # ===============================
