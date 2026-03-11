@@ -37,7 +37,8 @@ def sort_jobs_by_priority(jobs):
     """Ordena los trabajos de mayor a menor prioridad según AVG + STD"""
     n = len(jobs)
     order = list(range(n))
-    order.sort(key=lambda j: job_priority_index(j), reverse=True)
+    # La lambda recibe un índice j, y ahora pasamos jobs[j] (objeto Job) a job_priority_index
+    order.sort(key=lambda j: job_priority_index(jobs[j]), reverse=True)
     return order
 
 # ==========================================
